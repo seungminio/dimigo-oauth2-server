@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { createService, getServiceByClientId } from '../resources/oauth2';
-import { getAccountInfo } from '../resources/global';
+import { getAccountInfo, convertToGlobalAccount } from '../resources/global';
 
 const router = Router();
 
@@ -34,6 +34,18 @@ router.post('/service/new', async (req: Request, res: Response) => {
 router.post('/account/info', async (req: Request, res: Response) => {
   try {
     const account = await getAccountInfo(req.body.username, req.body.password);
+    res.status(200).json(account);
+  } catch ({ message }) {
+    res.status(500).json({ message });
+  }
+});
+
+router.post('/account/convert', async (req: Request, res: Response) => {
+  try {
+    const account = await convertToGlobalAccount(
+      req.body.username,
+      req.body.password,
+    );
     res.status(200).json(account);
   } catch ({ message }) {
     res.status(500).json({ message });

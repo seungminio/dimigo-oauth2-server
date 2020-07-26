@@ -8,7 +8,8 @@ import {
 
 export const userSchema = createSchema({
   idx: Type.number({ required: true, unique: true }),
-  id: Type.string({ required: true, unique: true }),
+  username: Type.string({ required: true, unique: true }),
+  password: Type.string({ required: true }),
   name: Type.string({ required: true }),
   gender: Type.string({ enum: GenderValues }),
   phone: Type.string({ required: true }),

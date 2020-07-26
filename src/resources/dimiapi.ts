@@ -23,6 +23,12 @@ async function getIdentity(account: IAccount) {
   return data;
 }
 
+async function getAllStudents() {
+  const { data } = await api.get(router.getAllStudents);
+  return data;
+}
+
 export default {
   getIdentity,
+  getAllStudents,
 };
