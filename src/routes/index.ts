@@ -14,7 +14,9 @@ const router = Router();
 // Use imported routes
 
 router.get('/', (_, res: Response) => {
-  res.status(200).send('👋 DIMIGOin Backnd Server');
+  res
+    .status(200)
+    .send('Korea Digital Media High School OAuth 2.0 Server Application 🚀');
 });
 
 router.get(
