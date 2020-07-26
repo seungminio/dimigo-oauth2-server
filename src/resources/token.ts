@@ -7,7 +7,11 @@ async function issue(identity: any, refresh: boolean = false) {
     expiresIn: refresh ? '1y' : '1w',
   };
 
-  const token = jwt.sign({ identity, refresh }, config.jwtSecret, signOptions);
+  const token = jwt.sign(
+    { ...identity, refresh },
+    config.jwtSecret,
+    signOptions,
+  );
 
   return token;
 }

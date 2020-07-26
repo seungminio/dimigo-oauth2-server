@@ -5,6 +5,7 @@ import {
   getToken,
   isUserConfirmed,
   userConfirming,
+  getUserInfoByToken,
 } from '../resources/oauth2';
 import { getAccountInfo, convertToGlobalAccount } from '../resources/global';
 
@@ -83,6 +84,16 @@ router.post('/account/confirm/info', async (req: Request, res: Response) => {
     const { username, password, clientId } = req.body;
     const result = await isUserConfirmed(username, password, clientId);
     res.status(200).json(result);
+  } catch ({ message }) {
+    res.status(500).json({ message });
+  }
+});
+
+router.post('/oauth/account/info', async (req: Request, res: Response) => {
+  try {
+    const { token, clientId, clientSecret } = req.body;
+    const userInfo = await getUserInfoByToken(token, clientId, clientSecret);
+    res.status(200).json(userInfo);
   } catch ({ message }) {
     res.status(500).json({ message });
   }

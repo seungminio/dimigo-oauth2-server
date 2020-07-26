@@ -1,9 +1,11 @@
 /* eslint-disable no-underscore-dangle */
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt-nodejs';
 import { serviceModel as ServiceModel } from '../models/service';
 import { userModel as UserModel } from '../models/user';
 import Token from './token';
 import { confirmModel as ConfirmModel } from '../models/confirm';
+import config from '../config';
 
 export const createService = async (name: string) => {
   if (!name) throw new Error('서비스 이름을 입력해주세요.');
@@ -105,4 +107,29 @@ export const getToken = async (
   };
 };
 
-export const getUserInfoByToken = async () => {};
+export const getUserInfoByToken = async (
+  token: string,
+  clientId: string,
+  clientSecret: string,
+) => {
+  const tokenVerify = jwt.verify(token, config.jwtSecret);
+  if (!tokenVerify) throw new Error('토큰이 올바르지 않습니다.');
+
+  const client = await ServiceModel.findOne({ clientId });
+  if (!client) throw new Error('서비스가 없습니다.');
+
+  const compareClientSecret = await bcrypt.compareSync(
+    clientSecret,
+    client.clientSecret,
+  );
+  if (!compareClientSecret)
+    throw new Error('clientSecret 키가 올바르지 않습니다.');
+
+  const user = UserModel.findById(Object(tokenVerify).user, {
+    _id: false,
+    password: false,
+  });
+  if (!user) throw new Error('유저가 없습니다.');
+
+  return user;
+};
