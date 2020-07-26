@@ -34,21 +34,49 @@ export const getServiceByClientId = async (clientId: string) => {
   return service.toObject();
 };
 
-export const userConfirming = async (userId: string, clientId: string) => {
+const getUserInfoByUsernameAndPassword = async (
+  username: string,
+  password: string,
+) => {
+  const identity = await UserModel.findOne({ username });
+  if (!identity) throw new Error('아이디나 비밀번호를 다시 한번 확인해주세요.');
+
+  const comparePassword = await bcrypt.compareSync(password, identity.password);
+  if (!comparePassword)
+    throw new Error('아이디나 비밀번호를 다시 한번 확인해주세요.');
+
+  return identity;
+};
+
+export const userConfirming = async (
+  username: string,
+  password: string,
+  clientId: string,
+) => {
+  const user = await getUserInfoByUsernameAndPassword(username, password);
+  const service = await ServiceModel.findOne({ clientId });
+  if (!service) throw new Error('서비스가 없습니다.');
   const findConfirm = await ConfirmModel.findOne({
-    user: userId,
-    service: clientId,
+    user: user._id,
+    service: service._id,
   });
   if (findConfirm) throw new Error('이미 연결한 서비스입니다.');
-  const confirm = new ConfirmModel({ user: userId, service: clientId });
+  const confirm = new ConfirmModel({ user: user._id, service: service._id });
   await confirm.save();
   return { message: '정상적으로 연결되었습니다.' };
 };
 
-export const isUserConfirmed = async (userId: string, clientId: string) => {
+export const isUserConfirmed = async (
+  username: string,
+  password: string,
+  clientId: string,
+) => {
+  const user = await getUserInfoByUsernameAndPassword(username, password);
+  const service = await ServiceModel.findOne({ clientId });
+  if (!service) throw new Error('서비스가 없습니다.');
   const findConfirm = await ConfirmModel.findOne({
-    user: userId,
-    service: clientId,
+    user: user._id,
+    service: service._id,
   });
   return { confirmed: !!findConfirm };
 };
@@ -58,25 +86,20 @@ export const getToken = async (
   password: string,
   clientId: string,
 ) => {
-  const identity = await UserModel.findOne({ username });
-  if (!identity) throw new Error('아이디나 비밀번호를 다시 한번 확인해주세요.');
-
-  const comparePassword = await bcrypt.compareSync(password, identity.password);
-  if (!comparePassword)
-    throw new Error('아이디나 비밀번호를 다시 한번 확인해주세요.');
+  const user = await getUserInfoByUsernameAndPassword(username, password);
 
   const service = await ServiceModel.findOne({ clientId });
   if (!service) throw new Error('서비스가 없습니다.');
 
   const confirm = await ConfirmModel.findOne({
-    user: identity._id,
-    service: clientId,
+    user: user._id,
+    service: service._id,
   });
   if (!confirm) throw new Error('연결되지 않은 서비스입니다.');
 
   return {
     accessToken: await Token.issue(
-      { user: identity._id, service: clientId },
+      { user: user._id, service: clientId },
       false,
     ),
   };

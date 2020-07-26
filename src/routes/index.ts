@@ -3,6 +3,8 @@ import {
   createService,
   getServiceByClientId,
   getToken,
+  isUserConfirmed,
+  userConfirming,
 } from '../resources/oauth2';
 import { getAccountInfo, convertToGlobalAccount } from '../resources/global';
 
@@ -61,6 +63,26 @@ router.post('/account/login', async (req: Request, res: Response) => {
     const { username, password, clientId } = req.body;
     const user = await getToken(username, password, clientId);
     res.status(200).json(user);
+  } catch ({ message }) {
+    res.status(500).json({ message });
+  }
+});
+
+router.post('/account/confirm', async (req: Request, res: Response) => {
+  try {
+    const { username, password, clientId } = req.body;
+    const confirm = await userConfirming(username, password, clientId);
+    res.status(200).json(confirm);
+  } catch ({ message }) {
+    res.status(500).json({ message });
+  }
+});
+
+router.post('/account/confirm/info', async (req: Request, res: Response) => {
+  try {
+    const { username, password, clientId } = req.body;
+    const result = await isUserConfirmed(username, password, clientId);
+    res.status(200).json(result);
   } catch ({ message }) {
     res.status(500).json({ message });
   }
