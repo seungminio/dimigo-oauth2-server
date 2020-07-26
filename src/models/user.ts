@@ -7,6 +7,7 @@ import {
 } from '../types';
 
 export const userSchema = createSchema({
+  _id: Type.objectId(),
   idx: Type.number({ required: true, unique: true }),
   username: Type.string({ required: true, unique: true }),
   password: Type.string({ required: true }),

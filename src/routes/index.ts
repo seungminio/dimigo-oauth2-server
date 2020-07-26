@@ -1,5 +1,9 @@
 import { Router, Request, Response } from 'express';
-import { createService, getServiceByClientId } from '../resources/oauth2';
+import {
+  createService,
+  getServiceByClientId,
+  getToken,
+} from '../resources/oauth2';
 import { getAccountInfo, convertToGlobalAccount } from '../resources/global';
 
 const router = Router();
@@ -47,6 +51,16 @@ router.post('/account/convert', async (req: Request, res: Response) => {
       req.body.password,
     );
     res.status(200).json(account);
+  } catch ({ message }) {
+    res.status(500).json({ message });
+  }
+});
+
+router.post('/account/login', async (req: Request, res: Response) => {
+  try {
+    const { username, password, clientId } = req.body;
+    const user = await getToken(username, password, clientId);
+    res.status(200).json(user);
   } catch ({ message }) {
     res.status(500).json({ message });
   }
